@@ -18,14 +18,15 @@ scale = 47.5  # 100 pixels for x=1
 mycircle = None  # objet utilisé pour le cercle rouge
 
 # Important data (to save)
-pseudo = "Gaston"  # provisory pseudo for user
+pseudo = ""  # provisory pseudo for user
 exercise = "GEO01"
 nbtrials = 0  # number of total trials
 nbsuccess = 0  # number of successful trials
 
+
 # On canvas click, check if succeeded or failed
 def canvas_click(event):
-    global mycircle, nbtrials, nbsuccess
+    global mycircle, nbtrials, nbsuccess, pseudo
     # x et y clicked
     click_x = (event.x - l / 2) / scale
     click_y = -(event.y - h / 2) / scale
@@ -45,16 +46,22 @@ def canvas_click(event):
     else:
         window_geo01.configure(bg="green")
         nbsuccess += 1
-    lbl_result.configure(text=f"{pseudo} Essais réussis : {nbsuccess} / {nbtrials}")
+        # Mettre à jour le pseudo dès le premier succès
+        if pseudo == "":
+            pseudo = entry_pseudo.get()
+            lbl_result.configure(text=f"{pseudo} Essais réussis : {nbsuccess} / {nbtrials}")
     window_geo01.update()
     time.sleep(1)  # Délai 1s
     next_point(event=None)
+
+
 
 def circle(x, y, r, color):
     # Circle, center x & y, r radius, color
     mycircle = canvas.create_oval((x - r) * scale + l / 2, -(y - r) * scale + h / 2, (x + r) * scale + l / 2,
                                   -(y + r) * scale + h / 2, fill=color)
     return mycircle
+
 
 def next_point(event):
     global target_x, target_y, mycircle
@@ -82,11 +89,12 @@ def next_point(event):
     lbl_target.configure(
         text=f"Cliquez sur le point ({round(target_x, 1)}, {round(target_y, 1)}). Echelle x -10 à +10, y-5 à +5")
 
+
 def save_game(event, entry_pseudo):
     global pseudo, exercise, start_date, nbtrials, nbsuccess
 
     # Récupérer le pseudo depuis l'interface utilisateur
-    pseudo = entry_pseudo.get()  # Utilisez le widget approprié qui contient le pseudo
+    pseudo = entry_pseudo.get()
 
     # Calcul de la durée
     end_date = datetime.datetime.now()
@@ -102,6 +110,10 @@ def save_game(event, entry_pseudo):
     nbsuccess = 0
     next_point(event=None)
 
+    # Mettez à jour le texte de l'étiquette avec le nouveau pseudo
+    lbl_result.configure(text=f"{pseudo} Essais réussis : {nbsuccess} / {nbtrials}")
+    window_geo01.update()
+
 def display_timer():
     duration = datetime.datetime.now() - start_date  # Elapsed time since beginning, in time with decimals
     duration_s = int(duration.total_seconds())  # Idem but in seconds (integer)
@@ -110,9 +122,9 @@ def display_timer():
         text="{:02d}".format(int(duration_s / 60)) + ":" + "{:02d}".format(duration_s % 60))
     window_geo01.after(1000, display_timer)  # Recommencer après 15 ms
 
+
 def open_window_geo_01(window):
-    # window = tk.Tk()
-    global window_geo01, hex_color, lbl_title, lbl_duration, lbl_result, lbl_target, canvas, start_date
+    global window_geo01, hex_color, lbl_title, lbl_duration, lbl_result, lbl_target, canvas, start_date, pseudo
     window_geo01 = tk.Toplevel(window)
 
     window_geo01.title("Exercice de géométrie")
@@ -122,6 +134,9 @@ def open_window_geo_01(window):
     rgb_color = (139, 201, 194)
     hex_color = '#%02x%02x%02x' % rgb_color  # Translation in hexa
     window_geo01.configure(bg=hex_color)
+
+    # Initialize pseudo to empty string
+    pseudo = ""
 
     # Canvas creation
     lbl_title = tk.Label(window_geo01, text=f"{exercise}", font=("Arial", 15))

@@ -20,23 +20,41 @@ def connect():
         print(f"Erreur de connexion à la base de données: {e}")
         return None
 
-def save_result(exercise_code, user_nickname, start_date, duration, nb_trials, nb_ok):
+def get_user_id(user_nickname):
     try:
         connection = connect()
         if connection:
             cursor = connection.cursor()
 
-            # Récupérer l'ID de l'utilisateur ou l'ajouter s'il n'existe pas
+            # Récupérer l'ID de l'utilisateur
             cursor.execute(f"SELECT id FROM Users WHERE nickname = '{user_nickname}'")
             user_row = cursor.fetchone()
 
+            print(f"Résultat de la requête pour l'utilisateur '{user_nickname}': {user_row}")
+
             if user_row:
                 user_id = user_row[0]
+                return user_id
             else:
-                # Ajouter l'utilisateur et récupérer l'ID
-                cursor.execute(f"INSERT INTO Users (nickname) VALUES ('{user_nickname}')")
-                connection.commit()
-                user_id = cursor.lastrowid  # Récupérer l'ID après l'ajout
+                print(f"L'utilisateur avec le pseudo '{user_nickname}' n'a pas été trouvé dans la base de données.")
+                return None
+
+    except Error as e:
+        print(f"Erreur lors de la récupération de l'ID de l'utilisateur : {e}")
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("Connexion à la base de données fermée")
+
+
+
+def get_exercise_id(exercise_code):
+    try:
+        connection = connect()
+        if connection:
+            cursor = connection.cursor()
 
             # Récupérer l'ID de l'exercice
             cursor.execute(f"SELECT id FROM exercices WHERE exercice_code = '{exercise_code}'")
@@ -44,9 +62,74 @@ def save_result(exercise_code, user_nickname, start_date, duration, nb_trials, n
 
             if exercise_row:
                 exercise_id = exercise_row[0]
+                return exercise_id
             else:
                 print(f"L'exercice avec le code '{exercise_code}' n'a pas été trouvé dans la base de données.")
-                return
+                return None
+
+    except Error as e:
+        print(f"Erreur lors de la récupération de l'ID de l'exercice : {e}")
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("Connexion à la base de données fermée")
+
+
+def get_user_results(user_id):
+    try:
+        connection = connect()
+        if connection:
+            cursor = connection.cursor()
+
+            # Récupérer les résultats associés à l'utilisateur
+            cursor.execute(f"SELECT * FROM results WHERE Users_id = {user_id}")
+            user_results = cursor.fetchall()
+
+            if user_results:
+                return user_results
+            else:
+                print(f"Aucun résultat trouvé pour l'utilisateur avec l'ID '{user_id}'.")
+                return None
+
+    except Error as e:
+        print(f"Erreur lors de la récupération des résultats de l'utilisateur : {e}")
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("Connexion à la base de données fermée")
+
+def save_result(exercise_code, user_pseudo, start_date, duration, nb_trials, nb_ok):
+    try:
+        connection = connect()
+        if connection:
+            cursor = connection.cursor()
+
+            # Récupérer l'ID de l'utilisateur ou l'ajouter s'il n'existe pas
+            user_id = get_user_id(user_pseudo)
+
+            if user_id is not None:
+                print(f"Utilisateur '{user_pseudo}' existe déjà. ID: {user_id}")
+            else:
+                # Ajouter l'utilisateur et récupérer l'ID
+                cursor.execute(f"INSERT INTO Users (nickname) VALUES ('{user_pseudo}')")
+                connection.commit()
+                user_id = cursor.lastrowid  # Récupérer l'ID après l'ajout
+                print(f"Utilisateur '{user_pseudo}' ajouté avec succès. ID: {user_id}")
+
+            # Affichez le pseudo correctement ici
+            print("Résultat enregistré avec succès pour l'utilisateur:", user_pseudo)
+
+            # Ajouter l'exercice s'il n'existe pas
+            exercise_id = get_exercise_id(exercise_code)
+            if exercise_id is None:
+                cursor.execute(f"INSERT INTO exercices (exercice_code) VALUES ('{exercise_code}')")
+                connection.commit()
+                exercise_id = cursor.lastrowid  # Récupérer l'ID après l'ajout
+                print(f"Exercice '{exercise_code}' ajouté avec succès. ID: {exercise_id}")
 
             # Insérer le résultat dans la table results (en excluant la colonne 'id')
             cursor.execute(
