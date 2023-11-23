@@ -55,11 +55,10 @@ def canvas_click(event):
     next_point(event=None)
 
 
-
 def circle(x, y, r, color):
     # Circle, center x & y, r radius, color
-    mycircle = canvas.create_oval((x - r) * scale + l / 2, -(y - r) * scale + h / 2, (x + r) * scale + l / 2,
-                                  -(y + r) * scale + h / 2, fill=color)
+    mycircle = canvas.create_oval((x - r) * scale + l / 2, -(y - r) * scale + h / 2,
+                                  (x + r) * scale + l / 2, -(y + r) * scale + h / 2, fill=color)
     return mycircle
 
 
@@ -113,6 +112,7 @@ def save_game(event, entry_pseudo):
     # Mettez à jour le texte de l'étiquette avec le nouveau pseudo
     lbl_result.configure(text=f"{pseudo} Essais réussis : {nbsuccess} / {nbtrials}")
     window_geo01.update()
+
 
 def display_timer():
     duration = datetime.datetime.now() - start_date  # Elapsed time since beginning, in time with decimals

@@ -1,6 +1,4 @@
-# Training (Menu)
-# JCY oct 23
-# PRO DB PY
+# menu.py
 
 import tkinter as tk
 import geo01
@@ -17,14 +15,41 @@ a_title = [None, None, None]  # Array of title (ex: GEO01)
 
 dict_games = {"geo01": geo01.open_window_geo_01, "info02": info02.open_window_info_02, "info05": info05.open_window_info_05}
 
-# Call other windows (exercices)
+# Call other windows (exercises)
 def exercise(event, exer):
     dict_games[exer](window)
 
 # Call display_results
 def display_result(event):
-    # TODO
-    print("display_result")
+    # Récupérer tous les résultats
+    all_results = database.get_all_results()
+
+    # Créer une nouvelle fenêtre pour afficher les résultats
+    result_window = tk.Toplevel(window)
+    result_window.title("Results")
+    result_window.geometry("600x400")
+
+    # Créer des étiquettes pour les champs
+    lbl_nickname = tk.Label(result_window, text="Nickname", font=("Arial", 12, "bold"))
+    lbl_hours = tk.Label(result_window, text="Hours", font=("Arial", 12, "bold"))
+    lbl_date_time = tk.Label(result_window, text="Date & Time", font=("Arial", 12, "bold"))
+    lbl_number_try = tk.Label(result_window, text="Number of Tries", font=("Arial", 12, "bold"))
+    lbl_number_ok = tk.Label(result_window, text="Number OK", font=("Arial", 12, "bold"))
+
+    # Positionner les étiquettes dans la fenêtre
+    lbl_nickname.grid(row=0, column=0, padx=10, pady=5)
+    lbl_hours.grid(row=0, column=1, padx=10, pady=5)
+    lbl_date_time.grid(row=0, column=2, padx=10, pady=5)
+    lbl_number_try.grid(row=0, column=3, padx=10, pady=5)
+    lbl_number_ok.grid(row=0, column=4, padx=10, pady=5)
+
+    # Afficher les résultats dans la fenêtre
+    for idx, result in enumerate(all_results, start=1):
+        tk.Label(result_window, text=result['nickname']).grid(row=idx, column=0, padx=10, pady=5)
+        tk.Label(result_window, text=result['hours']).grid(row=idx, column=1, padx=10, pady=5)
+        tk.Label(result_window, text=result['date_time']).grid(row=idx, column=2, padx=10, pady=5)
+        tk.Label(result_window, text=result['number_try']).grid(row=idx, column=3, padx=10, pady=5)
+        tk.Label(result_window, text=result['number_ok']).grid(row=idx, column=4, padx=10, pady=5)
 
 # Main window
 window = tk.Tk()
@@ -55,7 +80,7 @@ for ex in range(len(a_exercise)):
 # Buttons, display results & quit
 btn_display = tk.Button(window, text="Display results", font=("Arial", 15))
 btn_display.grid(row=1 + 2 * len(a_exercise) // 3, column=1)
-btn_display.bind("<Button-1>", lambda e: display_result(e))
+btn_display.bind("<Button-1>", display_result)
 
 btn_finish = tk.Button(window, text="Quitter", font=("Arial", 15))
 btn_finish.grid(row=2 + 2 * len(a_exercise) // 3, column=1)

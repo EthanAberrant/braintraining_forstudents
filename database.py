@@ -1,3 +1,4 @@
+# database.py
 import mysql.connector
 from mysql.connector import Error
 import datetime
@@ -19,6 +20,36 @@ def connect():
     except Error as e:
         print(f"Erreur de connexion à la base de données: {e}")
         return None
+
+def get_all_results():
+    try:
+        connection = connect()
+        if connection:
+            cursor = connection.cursor(dictionary=True)
+
+            # Récupérer tous les résultats
+            cursor.execute("""
+                SELECT Users.nickname, results.hours, results.date_time, results.number_try, results.number_ok
+                FROM results
+                INNER JOIN Users ON results.Users_id = Users.id
+                ORDER BY results.date_time DESC
+            """)
+            all_results = cursor.fetchall()
+
+            if all_results:
+                return all_results
+            else:
+                print("Aucun résultat trouvé dans la base de données.")
+                return None
+
+    except Error as e:
+        print(f"Erreur lors de la récupération des résultats : {e}")
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("Connexion à la base de données fermée")
 
 def get_user_id(user_nickname):
     try:
@@ -48,8 +79,6 @@ def get_user_id(user_nickname):
             connection.close()
             print("Connexion à la base de données fermée")
 
-
-
 def get_exercise_id(exercise_code):
     try:
         connection = connect()
@@ -69,32 +98,6 @@ def get_exercise_id(exercise_code):
 
     except Error as e:
         print(f"Erreur lors de la récupération de l'ID de l'exercice : {e}")
-
-    finally:
-        if connection.is_connected():
-            cursor.close()
-            connection.close()
-            print("Connexion à la base de données fermée")
-
-
-def get_user_results(user_id):
-    try:
-        connection = connect()
-        if connection:
-            cursor = connection.cursor()
-
-            # Récupérer les résultats associés à l'utilisateur
-            cursor.execute(f"SELECT * FROM results WHERE Users_id = {user_id}")
-            user_results = cursor.fetchall()
-
-            if user_results:
-                return user_results
-            else:
-                print(f"Aucun résultat trouvé pour l'utilisateur avec l'ID '{user_id}'.")
-                return None
-
-    except Error as e:
-        print(f"Erreur lors de la récupération des résultats de l'utilisateur : {e}")
 
     finally:
         if connection.is_connected():
