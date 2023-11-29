@@ -1,4 +1,4 @@
-# Training (GEO01)
+ # Training (GEO01)
 # JCY oct 23
 # PRO DB PY
 
@@ -101,7 +101,8 @@ def save_game(event, entry_pseudo):
     duration_str = "{:02d}:{:02d}".format(int(duration.total_seconds() / 60), int(duration.total_seconds() % 60))
 
     # Enregistrement dans la base de données
-    database.save_result(exercise, pseudo, start_date, duration_str, nbtrials, nbsuccess)
+    database.save_result("geo01", pseudo, start_date, duration_str, nbtrials, nbsuccess)
+
 
     print("Enregistrement terminé")
     # Réinitialisation des variables pour le prochain exercice

@@ -21,17 +21,19 @@ def connect():
         print(f"Erreur de connexion à la base de données: {e}")
         return None
 
-def get_all_results():
+def get_all_results_with_exercise():
     try:
         connection = connect()
         if connection:
             cursor = connection.cursor(dictionary=True)
 
-            # Récupérer tous les résultats
+            # Récupérer tous les résultats avec les informations de l'exercice
             cursor.execute("""
-                SELECT Users.nickname, results.hours, results.date_time, results.number_try, results.number_ok
+                SELECT Users.nickname, results.hours, results.date_time, results.number_try, results.number_ok,
+                       exercices.exercice_code AS exercise_code
                 FROM results
                 INNER JOIN Users ON results.Users_id = Users.id
+                INNER JOIN exercices ON results.exercices_id = exercices.id
                 ORDER BY results.date_time DESC
             """)
             all_results = cursor.fetchall()
@@ -50,6 +52,7 @@ def get_all_results():
             cursor.close()
             connection.close()
             print("Connexion à la base de données fermée")
+
 
 def get_user_id(user_nickname):
     try:
@@ -104,6 +107,7 @@ def get_exercise_id(exercise_code):
             cursor.close()
             connection.close()
             print("Connexion à la base de données fermée")
+
 
 def save_result(exercise_code, user_pseudo, start_date, duration, nb_trials, nb_ok):
     try:
