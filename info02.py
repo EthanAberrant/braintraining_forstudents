@@ -1,3 +1,9 @@
+""" Ethan Martin
+    Projet DBPY
+    le 05.12.23"""
+
+# Training (INFO02)
+
 import tkinter as tk
 import random
 import time

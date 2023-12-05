@@ -1,7 +1,12 @@
+""" Ethan Martin
+    Projet DBPY
+    le 05.12.23"""
+
 # database.py
 import mysql.connector
 from mysql.connector import Error
 import datetime
+
 
 def connect():
     try:
@@ -20,6 +25,7 @@ def connect():
     except Error as e:
         print(f"Erreur de connexion à la base de données: {e}")
         return None
+
 
 def get_all_results_with_exercise():
     try:
@@ -81,6 +87,7 @@ def get_user_id(user_nickname):
             cursor.close()
             connection.close()
             print("Connexion à la base de données fermée")
+
 
 def get_exercise_id(exercise_code):
     try:
@@ -146,6 +153,104 @@ def save_result(exercise_code, user_pseudo, start_date, duration, nb_trials, nb_
 
             connection.commit()
             print("Résultat enregistré avec succès")
+
+    except Error as e:
+        print(f"Erreur lors de l'enregistrement du résultat dans la base de données: {e}")
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("Connexion à la base de données fermée")
+
+def get_filtered_results(exercise_filter, nickname_filter, start_date_filter, end_date_filter):
+    try:
+        connection = connect()
+        if connection:
+            cursor = connection.cursor(dictionary=True)
+
+            # Construire la requête SQL en fonction des filtres fournis
+            query = """
+                SELECT Users.nickname, results.hours, results.date_time, results.number_try, results.number_ok,
+                       exercices.exercice_code AS exercise_code
+                FROM results
+                INNER JOIN Users ON results.Users_id = Users.id
+                INNER JOIN exercices ON results.exercices_id = exercices.id
+                WHERE 1
+            """
+
+            if exercise_filter:
+                query += f" AND exercices.exercice_code = '{exercise_filter}'"
+
+            if nickname_filter:
+                query += f" AND Users.nickname = '{nickname_filter}'"
+
+            if start_date_filter:
+                query += f" AND results.date_time >= '{start_date_filter}'"
+
+            if end_date_filter:
+                query += f" AND results.date_time <= '{end_date_filter}'"
+
+            query += " ORDER BY results.date_time DESC"
+
+            # Exécuter la requête
+            cursor.execute(query)
+            filtered_results = cursor.fetchall()
+
+            if filtered_results:
+                return filtered_results
+            else:
+                print("Aucun résultat trouvé avec les filtres spécifiés.")
+                return None
+
+    except Error as e:
+        print(f"Erreur lors de la récupération des résultats filtrés : {e}")
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("Connexion à la base de données fermée")
+
+def save_info05_results(user_pseudo, start_date, duration, nb_trials, nb_ok):
+    try:
+        connection = connect()
+        if connection:
+            cursor = connection.cursor()
+
+            # Récupérer l'ID de l'utilisateur ou l'ajouter s'il n'existe pas
+            user_pseudo = entry_pseudo.get()
+            user_id = get_user_id(user_pseudo)
+
+            if user_id is not None:
+                print(f"Utilisateur '{user_pseudo}' existe déjà. ID: {user_id}")
+            else:
+                # Ajouter l'utilisateur et récupérer l'ID
+                cursor.execute(f"INSERT INTO Users (nickname) VALUES ('{user_pseudo}')")
+                connection.commit()
+                user_id = cursor.lastrowid  # Récupérer l'ID après l'ajout
+                print(f"Utilisateur '{user_pseudo}' ajouté avec succès. ID: {user_id}")
+
+            # Affichez le pseudo correctement ici
+            print("Résultat enregistré avec succès pour l'utilisateur:", user_pseudo)
+
+            # Ajouter l'exercice INFO05 s'il n'existe pas
+            exercise_code = "INFO05"
+            exercise_id = get_exercise_id(exercise_code)
+            if exercise_id is None:
+                cursor.execute(f"INSERT INTO exercices (exercice_code) VALUES ('{exercise_code}')")
+                connection.commit()
+                exercise_id = cursor.lastrowid  # Récupérer l'ID après l'ajout
+                print(f"Exercice '{exercise_code}' ajouté avec succès. ID: {exercise_id}")
+
+            # Insérer le résultat dans la table results (en excluant la colonne 'id')
+            cursor.execute(
+                f"INSERT INTO results (hours, date_time, number_try, number_ok, Users_id, exercices_id) "
+                f"VALUES ('{duration}', '{start_date}', {nb_trials}, {nb_ok}, {user_id}, {exercise_id})"
+            )
+
+            connection.commit()
+            print("Résultat enregistré avec succès pour l'exercice INFO05")
 
     except Error as e:
         print(f"Erreur lors de l'enregistrement du résultat dans la base de données: {e}")

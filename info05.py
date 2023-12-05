@@ -1,6 +1,8 @@
+""" Ethan Martin
+    Projet DBPY
+    le 05.12.23"""
 # Training (INFO05)
-# JCY oct 23
-# PRO DB PY
+
 import math
 import tkinter as tk
 from tkinter.messagebox import showinfo          # Les alertes
@@ -21,7 +23,7 @@ xmed=250 #middle of 2 color rectangles
 
 
 #important data (to save)
-pseudo="Gaston" #provisory pseudo for user
+pseudo="" #provisory pseudo for user
 exercise="INFO05"
 nbtrials=0 #number of total trials
 nbsuccess=0 #number of successfull trials
@@ -36,6 +38,7 @@ line_hor_response=None #little horizontal line for response cross on colorwheel
 line_vert_response=None #little vertical line for response cross on colorwheel
 lbl_distance=None #to display the distance between the 2 colors
 
+entry_pseudo = None
 
 #next color
 def next_color(event):
@@ -191,8 +194,25 @@ def sl_v(event):
 
 
 def save_game(event):
-    print("dans save")
-    #TODO
+    global pseudo, exercise, nbtrials, nbsuccess, start_date
+    duration = datetime.datetime.now() - start_date
+    duration_s = int(duration.total_seconds())
+
+    # Enregistrez les résultats dans la base de données
+    database.save_info05_results(entry_pseudo.get(), start_date, duration_s, nbtrials, nbsuccess)
+
+    # Mettez à jour le pseudo actuel
+    pseudo = entry_pseudo.get()
+
+    # Réinitialisez les variables pour le prochain essai
+    nbtrials = 0
+    nbsuccess = 0
+    start_date = datetime.datetime.now()
+
+    # Mettez à jour l'affichage des résultats
+    lbl_result.configure(text=f"{pseudo} Essais réussis : {nbsuccess} / {nbtrials}")
+
+
 
 
 def display_timer():

@@ -1,6 +1,8 @@
- # Training (GEO01)
-# JCY oct 23
-# PRO DB PY
+""" Ethan Martin
+    Projet DBPY
+    le 05.12.23"""
+
+# Training (GEO01)
 
 import tkinter as tk
 import random
