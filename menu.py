@@ -6,6 +6,10 @@ import info02
 import info05
 import datetime
 import database
+from tkinter import StringVar
+from tkinter.ttk import Combobox
+
+
 
 a_exercise = ["geo01", "info02", "info05"]
 albl_image = [None, None, None]  # Label (with images) array
@@ -114,6 +118,20 @@ def modify_result(result_id, current_hours, current_number_try, current_number_o
     entry_modify_hours.grid(row=0, column=1, padx=5, pady=5)
     entry_modify_hours.insert(0, current_hours)
 
+    # Champ d'entrée pour choisir le pseudo
+    lbl_choose_pseudo = tk.Label(modify_window, text="Choisir le pseudo:", font=("Arial", 12))
+    lbl_choose_pseudo.grid(row=3, column=0, padx=5, pady=5)
+    entry_choose_pseudo = tk.Entry(modify_window, font=("Arial", 12))
+    entry_choose_pseudo.grid(row=3, column=1, padx=5, pady=5)
+    entry_choose_pseudo.insert(0, current_pseudo)
+
+    # Combobox pour choisir le jeu
+    lbl_choose_game = tk.Label(modify_window, text="Choisir le jeu:", font=("Arial", 12))
+    lbl_choose_game.grid(row=4, column=0, padx=5, pady=5)
+    combo_choose_game = ttk.Combobox(modify_window, values=game_options, font=("Arial", 12))
+    combo_choose_game.grid(row=4, column=1, padx=5, pady=5)
+    combo_choose_game.set(current_game)
+
     lbl_modify_number_try = tk.Label(modify_window, text="Nouveau nombre d'essais:", font=("Arial", 12))
     lbl_modify_number_try.grid(row=1, column=0, padx=5, pady=5)
     entry_modify_number_try = tk.Entry(modify_window, font=("Arial", 12))
@@ -128,10 +146,12 @@ def modify_result(result_id, current_hours, current_number_try, current_number_o
 
     btn_modify_result = tk.Button(modify_window, text="Modifier le résultat", font=("Arial", 12),
                                   command=lambda: update_result(result_id,
-                                                               entry_modify_hours.get(),
-                                                               entry_modify_number_try.get(),
-                                                               entry_modify_number_ok.get()))
-    btn_modify_result.grid(row=3, column=0, columnspan=2, pady=10)
+                                                                entry_modify_hours.get(),
+                                                                entry_modify_number_try.get(),
+                                                                entry_modify_number_ok.get(),
+                                                                entry_choose_pseudo.get(),
+                                                                combo_choose_game.get()))
+    btn_modify_result.grid(row=5, column=0, columnspan=2, pady=10)
 
 
 def update_result(result_id, new_hours, new_number_try, new_number_ok):
@@ -142,38 +162,62 @@ def update_result(result_id, new_hours, new_number_try, new_number_ok):
 def add_result():
     result_window = tk.Toplevel(window)
     result_window.title("Ajouter un résultat")
-    result_window.geometry("400x200")
+    result_window.geometry("400x220")
+
+    lbl_add_pseudo = tk.Label(result_window, text="Pseudo:", font=("Arial", 12))
+    lbl_add_pseudo.grid(row=0, column=0, padx=5, pady=5)
+
+    # Utilisation d'un champ d'entrée pour le pseudo
+    entry_pseudo = tk.Entry(result_window, font=("Arial", 12))
+    entry_pseudo.grid(row=0, column=1, padx=5, pady=5)
 
     lbl_add_hours = tk.Label(result_window, text="Temps:", font=("Arial", 12))
-    lbl_add_hours.grid(row=0, column=0, padx=5, pady=5)
+    lbl_add_hours.grid(row=1, column=0, padx=5, pady=5)
     entry_add_hours = tk.Entry(result_window, font=("Arial", 12))
-    entry_add_hours.grid(row=0, column=1, padx=5, pady=5)
+    entry_add_hours.grid(row=1, column=1, padx=5, pady=5)
 
     lbl_add_number_try = tk.Label(result_window, text="Nombre d'essais:", font=("Arial", 12))
-    lbl_add_number_try.grid(row=1, column=0, padx=5, pady=5)
+    lbl_add_number_try.grid(row=2, column=0, padx=5, pady=5)
     entry_add_number_try = tk.Entry(result_window, font=("Arial", 12))
-    entry_add_number_try.grid(row=1, column=1, padx=5, pady=5)
+    entry_add_number_try.grid(row=2, column=1, padx=5, pady=5)
 
     lbl_add_number_ok = tk.Label(result_window, text="Nombre d'essais réussis:", font=("Arial", 12))
-    lbl_add_number_ok.grid(row=2, column=0, padx=5, pady=5)
+    lbl_add_number_ok.grid(row=3, column=0, padx=5, pady=5)
     entry_add_number_ok = tk.Entry(result_window, font=("Arial", 12))
-    entry_add_number_ok.grid(row=2, column=1, padx=5, pady=5)
+    entry_add_number_ok.grid(row=3, column=1, padx=5, pady=5)
+
+    # Ajout de la combobox pour le jeu
+    lbl_add_game = tk.Label(result_window, text="Jeu:", font=("Arial", 12))
+    lbl_add_game.grid(row=4, column=0, padx=5, pady=5)
+    game_options = ["GEO01", "INFO02", "INFO05"]  # Remplacez par vos données réelles
+    selected_game = StringVar()
+    combo_game = Combobox(result_window, textvariable=selected_game, values=game_options)
+    combo_game.grid(row=4, column=1, padx=5, pady=5)
 
     btn_add_result = tk.Button(result_window, text="Ajouter le résultat", font=("Arial", 12),
-                               command=lambda: save_new_result(entry_add_hours.get(),
+                               command=lambda: save_new_result(selected_game.get(),
+                                                               entry_pseudo.get(),
+                                                               entry_add_hours.get(),
                                                                entry_add_number_try.get(),
                                                                entry_add_number_ok.get()))
-    btn_add_result.grid(row=3, column=0, columnspan=2, pady=10)
+    btn_add_result.grid(row=5, column=0, columnspan=2, pady=10)
 
 
-def save_new_result(hours, number_try, number_ok):
-    # Vous devrez adapter cela en fonction des besoins de votre programme
-    # Cela peut impliquer de récupérer l'exercice et le pseudo à partir de l'interface utilisateur
-    exercise_code = "Votre exercice"  # Remplacez par la logique pour obtenir l'exercice
-    user_pseudo = "Votre pseudo"  # Remplacez par la logique pour obtenir le pseudo
+
+def save_new_result(exercise_code, user_pseudo, hours, number_try, number_ok):
+    # Obtenez l'ID de l'utilisateur
+    user_id = database.get_user_id(user_pseudo)
+
+    # Obtenez l'ID de l'exercice
+    exercise_id = database.get_exercise_id(exercise_code)
+
+    # Obtenez la date actuelle
     start_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    # Enregistrez le résultat avec les informations obtenues
     database.save_result(exercise_code, user_pseudo, start_date, hours, number_try, number_ok)
+
+    # Affichez le résultat mis à jour
     display_result()
 
 

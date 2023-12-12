@@ -2,7 +2,6 @@
     Projet DBPY
     le 05.12.23"""
 
-# database.py
 import mysql.connector
 from mysql.connector import Error
 import datetime
@@ -267,11 +266,30 @@ def delete_result(result_id):
         if connection:
             cursor = connection.cursor()
 
+            # Récupérer l'ID de l'utilisateur associé au résultat
+            cursor.execute(f"SELECT Users_id FROM results WHERE id = {result_id}")
+            user_id = cursor.fetchone()
+
             # Supprimer le résultat avec l'ID spécifié
             cursor.execute(f"DELETE FROM results WHERE id = {result_id}")
-
             connection.commit()
-            print(f"Résultat avec l'ID {result_id} supprimé avec succès")
+
+            # Vérifier si la suppression a eu lieu avec succès
+            if cursor.rowcount > 0:
+                print(f"Résultat avec l'ID {result_id} supprimé avec succès")
+
+                # Vérifier si l'utilisateur associé n'a plus aucun résultat
+                cursor.execute(f"SELECT id FROM results WHERE Users_id = {user_id[0]}")
+                remaining_results = cursor.fetchall()
+
+                if not remaining_results:
+                    # Aucun autre résultat trouvé pour cet utilisateur, supprimer l'utilisateur
+                    cursor.execute(f"DELETE FROM Users WHERE id = {user_id[0]}")
+                    connection.commit()
+                    print(f"Utilisateur avec l'ID {user_id[0]} supprimé car il n'a plus de résultats.")
+
+            else:
+                print(f"Aucun résultat trouvé avec l'ID {result_id}. La suppression a peut-être échoué.")
 
     except Error as e:
         print(f"Erreur lors de la suppression du résultat : {e}")
@@ -283,21 +301,49 @@ def delete_result(result_id):
             print("Connexion à la base de données fermée")
 
 
-def update_result(result_id, new_hours, new_number_try, new_number_ok):
+
+def update_result(result_id, new_hours, new_number_try, new_number_ok, new_pseudo=None, new_game=None):
     try:
         connection = connect()
         if connection:
             cursor = connection.cursor()
 
-            # Mettre à jour le résultat avec les nouvelles valeurs
-            cursor.execute(f"""
-                UPDATE results
-                SET hours = '{new_hours}', number_try = {new_number_try}, number_ok = {new_number_ok}
-                WHERE id = {result_id}
-            """)
+            # Récupérer les informations actuelles du résultat
+            result_info = get_result_info(result_id)
+            if not result_info:
+                print(f"Aucune information trouvée pour le résultat avec l'ID {result_id}")
+                return
 
+            # Utiliser les valeurs actuelles ou les nouvelles si elles sont fournies
+            current_pseudo = result_info['current_pseudo'] if new_pseudo is None else new_pseudo
+            current_game = result_info['current_game'] if new_game is None else new_game
+
+            # Récupérer l'ID du nouvel utilisateur ou l'ajouter s'il n'existe pas
+            user_id = get_user_id(current_pseudo)
+
+            if user_id is None:
+                print(f"L'utilisateur '{current_pseudo}' n'existe pas.")
+                return
+
+            # Récupérer l'ID du nouvel exercice ou l'ajouter s'il n'existe pas
+            exercise_id = get_exercise_id(current_game)
+
+            if exercise_id is None:
+                print(f"L'exercice '{current_game}' n'existe pas.")
+                return
+
+            # Construire la requête SQL pour la mise à jour
+            query = """
+                UPDATE results
+                SET hours = %s, number_try = %s, number_ok = %s, Users_id = %s, exercices_id = %s
+                WHERE id = %s
+            """
+
+            # Exécuter la requête avec les nouveaux paramètres
+            cursor.execute(query, (new_hours, new_number_try, new_number_ok, user_id, exercise_id, result_id))
             connection.commit()
-            print(f"Résultat avec l'ID {result_id} mis à jour avec succès")
+
+            print("Résultat mis à jour avec succès.")
 
     except Error as e:
         print(f"Erreur lors de la mise à jour du résultat : {e}")
@@ -307,6 +353,9 @@ def update_result(result_id, new_hours, new_number_try, new_number_ok):
             cursor.close()
             connection.close()
             print("Connexion à la base de données fermée")
+
+
+
 
 
 def get_result_info(result_id):
@@ -331,6 +380,31 @@ def get_result_info(result_id):
 
     except Error as e:
         print(f"Erreur lors de la récupération des informations du résultat : {e}")
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("Connexion à la base de données fermée")
+
+def get_all_games():
+    try:
+        connection = connect()
+        if connection:
+            cursor = connection.cursor()
+
+            # Récupérer tous les jeux
+            cursor.execute("SELECT DISTINCT exercise_code FROM exercices")
+            games = cursor.fetchall()
+
+            if games:
+                return [game[0] for game in games]
+            else:
+                print("Aucun jeu trouvé dans la base de données.")
+                return []
+
+    except Error as e:
+        print(f"Erreur lors de la récupération des jeux : {e}")
 
     finally:
         if connection.is_connected():
