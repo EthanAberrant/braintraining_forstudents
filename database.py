@@ -163,7 +163,8 @@ def save_result(exercise_code, user_pseudo, start_date, duration, nb_trials, nb_
             connection.close()
             print("Connexion à la base de données fermée")
 
-def get_filtered_results(exercise_filter, nickname_filter, start_date_filter, end_date_filter):
+
+def get_filtered_results(exercise_filter, nickname_filter, start_date_filter):
     try:
         connection = connect()
         if connection:
@@ -171,7 +172,7 @@ def get_filtered_results(exercise_filter, nickname_filter, start_date_filter, en
 
             # Construire la requête SQL en fonction des filtres fournis
             query = """
-                SELECT Users.nickname, results.hours, results.date_time, results.number_try, results.number_ok,
+                SELECT results.id, Users.nickname, results.hours, results.date_time, results.number_try, results.number_ok,
                        exercices.exercice_code AS exercise_code
                 FROM results
                 INNER JOIN Users ON results.Users_id = Users.id
@@ -187,9 +188,6 @@ def get_filtered_results(exercise_filter, nickname_filter, start_date_filter, en
 
             if start_date_filter:
                 query += f" AND results.date_time >= '{start_date_filter}'"
-
-            if end_date_filter:
-                query += f" AND results.date_time <= '{end_date_filter}'"
 
             query += " ORDER BY results.date_time DESC"
 
@@ -211,6 +209,7 @@ def get_filtered_results(exercise_filter, nickname_filter, start_date_filter, en
             cursor.close()
             connection.close()
             print("Connexion à la base de données fermée")
+
 
 def save_info05_results(user_pseudo, start_date, duration, nb_trials, nb_ok):
     try:
@@ -254,6 +253,84 @@ def save_info05_results(user_pseudo, start_date, duration, nb_trials, nb_ok):
 
     except Error as e:
         print(f"Erreur lors de l'enregistrement du résultat dans la base de données: {e}")
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("Connexion à la base de données fermée")
+
+
+def delete_result(result_id):
+    try:
+        connection = connect()
+        if connection:
+            cursor = connection.cursor()
+
+            # Supprimer le résultat avec l'ID spécifié
+            cursor.execute(f"DELETE FROM results WHERE id = {result_id}")
+
+            connection.commit()
+            print(f"Résultat avec l'ID {result_id} supprimé avec succès")
+
+    except Error as e:
+        print(f"Erreur lors de la suppression du résultat : {e}")
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("Connexion à la base de données fermée")
+
+
+def update_result(result_id, new_hours, new_number_try, new_number_ok):
+    try:
+        connection = connect()
+        if connection:
+            cursor = connection.cursor()
+
+            # Mettre à jour le résultat avec les nouvelles valeurs
+            cursor.execute(f"""
+                UPDATE results
+                SET hours = '{new_hours}', number_try = {new_number_try}, number_ok = {new_number_ok}
+                WHERE id = {result_id}
+            """)
+
+            connection.commit()
+            print(f"Résultat avec l'ID {result_id} mis à jour avec succès")
+
+    except Error as e:
+        print(f"Erreur lors de la mise à jour du résultat : {e}")
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("Connexion à la base de données fermée")
+
+
+def get_result_info(result_id):
+    try:
+        connection = connect()
+        if connection:
+            cursor = connection.cursor(dictionary=True)
+
+            # Récupérer les informations du résultat avec l'ID spécifié
+            cursor.execute(f"""
+                SELECT hours, number_try, number_ok
+                FROM results
+                WHERE id = {result_id}
+            """)
+            result_info = cursor.fetchone()
+
+            if result_info:
+                return result_info
+            else:
+                print(f"Aucune information trouvée pour le résultat avec l'ID {result_id}")
+                return None
+
+    except Error as e:
+        print(f"Erreur lors de la récupération des informations du résultat : {e}")
 
     finally:
         if connection.is_connected():
