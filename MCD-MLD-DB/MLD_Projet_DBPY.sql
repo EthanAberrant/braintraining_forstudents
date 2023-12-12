@@ -53,12 +53,13 @@ CREATE TABLE IF NOT EXISTS `projet_dbpy`.`results` (
   PRIMARY KEY (`id`),
   INDEX (`Users_id` ASC) VISIBLE,
   INDEX (`exercices_id` ASC) VISIBLE,
-  CONSTRAINT ``
+  CONSTRAINT `fk_results_users`
     FOREIGN KEY (`Users_id`)
     REFERENCES `projet_dbpy`.`Users` (`id`),
-  CONSTRAINT ``
+  CONSTRAINT `fk_results_exercices`
     FOREIGN KEY (`exercices_id`)
-    REFERENCES `projet_dbpy`.`exercices` (`id`))
+    REFERENCES `projet_dbpy`.`exercices` (`id`)
+)
 ENGINE = InnoDB;
 
 
