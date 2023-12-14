@@ -9,8 +9,6 @@ import database
 from tkinter import StringVar
 from tkinter.ttk import Combobox
 
-
-
 a_exercise = ["geo01", "info02", "info05"]
 albl_image = [None, None, None]  # Label (with images) array
 a_image = [None, None, None]  # Images array
@@ -87,7 +85,8 @@ def display_result(event=None):
                                    command=lambda result=result: modify_result(result['id'],
                                                                                result['hours'],
                                                                                result['number_try'],
-                                                                               result['number_ok']))
+                                                                               result['number_ok'],
+                                                                               result['nickname']))
             btn_modify.grid(row=idx, column=6, padx=5, pady=5)
 
             btn_delete = tk.Button(labels_frame, text="Supprimer", font=("Arial", 12),
@@ -107,10 +106,18 @@ def delete_result(result_id):
     database.delete_result(result_id)
     display_result()
 
-def modify_result(result_id, current_hours, current_number_try, current_number_ok):
+
+def modify_result(result_id, current_hours, current_number_try, current_number_ok, current_pseudo):
+    result_info = database.get_result_info(result_id)
+    if not result_info:
+        print(f"Aucune information trouvée pour le résultat avec l'ID {result_id}")
+        return
+
+    current_game = result_info['current_game']
+
     modify_window = tk.Toplevel(window)
     modify_window.title("Modifier le résultat")
-    modify_window.geometry("400x200")
+    modify_window.geometry("500x220")
 
     lbl_modify_hours = tk.Label(modify_window, text="Nouveau temps:", font=("Arial", 12))
     lbl_modify_hours.grid(row=0, column=0, padx=5, pady=5)
@@ -128,7 +135,7 @@ def modify_result(result_id, current_hours, current_number_try, current_number_o
     # Combobox pour choisir le jeu
     lbl_choose_game = tk.Label(modify_window, text="Choisir le jeu:", font=("Arial", 12))
     lbl_choose_game.grid(row=4, column=0, padx=5, pady=5)
-    combo_choose_game = ttk.Combobox(modify_window, values=game_options, font=("Arial", 12))
+    combo_choose_game = ttk.Combobox(modify_window, values=database.get_all_games(), font=("Arial", 12))
     combo_choose_game.grid(row=4, column=1, padx=5, pady=5)
     combo_choose_game.set(current_game)
 
@@ -153,10 +160,9 @@ def modify_result(result_id, current_hours, current_number_try, current_number_o
                                                                 combo_choose_game.get()))
     btn_modify_result.grid(row=5, column=0, columnspan=2, pady=10)
 
-
-def update_result(result_id, new_hours, new_number_try, new_number_ok):
-    database.update_result(result_id, new_hours, new_number_try, new_number_ok)
-    display_result()
+def update_result(result_id, new_hours, new_number_try, new_number_ok, new_pseudo, new_game):
+    # Assurez-vous que la fonction update_result dans votre module database est correctement implémentée
+    database.update_result(result_id, new_hours, new_number_try, new_number_ok, new_pseudo, new_game)
 
 
 def add_result():
@@ -201,7 +207,6 @@ def add_result():
                                                                entry_add_number_try.get(),
                                                                entry_add_number_ok.get()))
     btn_add_result.grid(row=5, column=0, columnspan=2, pady=10)
-
 
 
 def save_new_result(exercise_code, user_pseudo, hours, number_try, number_ok):

@@ -356,8 +356,6 @@ def update_result(result_id, new_hours, new_number_try, new_number_ok, new_pseud
 
 
 
-
-
 def get_result_info(result_id):
     try:
         connection = connect()
@@ -366,9 +364,11 @@ def get_result_info(result_id):
 
             # Récupérer les informations du résultat avec l'ID spécifié
             cursor.execute(f"""
-                SELECT hours, number_try, number_ok
+                SELECT results.id, results.hours, results.number_try, results.number_ok, Users.nickname AS current_pseudo, exercices.exercice_code AS current_game
                 FROM results
-                WHERE id = {result_id}
+                INNER JOIN Users ON results.Users_id = Users.id
+                INNER JOIN exercices ON results.exercices_id = exercices.id
+                WHERE results.id = {result_id}
             """)
             result_info = cursor.fetchone()
 
@@ -387,6 +387,8 @@ def get_result_info(result_id):
             connection.close()
             print("Connexion à la base de données fermée")
 
+
+
 def get_all_games():
     try:
         connection = connect()
@@ -394,7 +396,7 @@ def get_all_games():
             cursor = connection.cursor()
 
             # Récupérer tous les jeux
-            cursor.execute("SELECT DISTINCT exercise_code FROM exercices")
+            cursor.execute("SELECT DISTINCT exercice_code FROM exercices")
             games = cursor.fetchall()
 
             if games:
@@ -411,3 +413,5 @@ def get_all_games():
             cursor.close()
             connection.close()
             print("Connexion à la base de données fermée")
+
+
