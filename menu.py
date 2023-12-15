@@ -160,6 +160,7 @@ def modify_result(result_id, current_hours, current_number_try, current_number_o
                                                                 combo_choose_game.get()))
     btn_modify_result.grid(row=5, column=0, columnspan=2, pady=10)
 
+
 def update_result(result_id, new_hours, new_number_try, new_number_ok, new_pseudo, new_game):
     # Assurez-vous que la fonction update_result dans votre module database est correctement implémentée
     database.update_result(result_id, new_hours, new_number_try, new_number_ok, new_pseudo, new_game)

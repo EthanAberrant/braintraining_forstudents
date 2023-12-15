@@ -23,6 +23,7 @@ n2 = 0  # Valeur à convertir
 u2 = unite[0]
 rapport = 0
 
+
 def next(event):
     global n1, u1, u2, rapport
     window_info02.configure(bg=hex_color)
@@ -42,6 +43,7 @@ def next(event):
     label_n1.configure(text=f" {n1} {u1} =")
     label_u2.configure(text=f" {u2} ")
     entry_n2.delete(0, 'end')
+
 
 def save_game():
     global pseudo, nbtrials, nbsuccess
@@ -64,6 +66,7 @@ def save_game():
     # Mettre à jour le texte de l'étiquette avec le nouveau pseudo
     lbl_result.configure(text=f"{pseudo} Essais réussis : {nbsuccess} / {nbtrials}")
 
+
 def test():
     global n2, nbsuccess, nbtrials
     # Fonction pour tester si la valeur est correcte
@@ -80,12 +83,14 @@ def test():
     time.sleep(1)  # Délai 1s
     next(event=None)
 
+
 def display_timer():
     duration = datetime.datetime.now() - start_date  # Temps écoulé depuis le début, en temps avec décimales
     duration_s = int(duration.total_seconds())  # Idem mais en secondes (entier)
     # Affichage min:sec (00:13)
     lbl_duration.configure(text="{:02d}".format(int(duration_s / 60)) + ":" + "{:02d}".format(duration_s % 60))
     window_info02.after(1000, display_timer)  # Recommencer après 15 ms
+
 
 def open_window_info_02(window):
     global window_info02, lbl_duration, lbl_result, entry_pseudo, hex_color, start_date, label_n1, label_u2, entry_n2

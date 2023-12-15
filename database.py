@@ -301,7 +301,6 @@ def delete_result(result_id):
             print("Connexion à la base de données fermée")
 
 
-
 def update_result(result_id, new_hours, new_number_try, new_number_ok, new_pseudo=None, new_game=None):
     try:
         connection = connect()
@@ -355,7 +354,6 @@ def update_result(result_id, new_hours, new_number_try, new_number_ok, new_pseud
             print("Connexion à la base de données fermée")
 
 
-
 def get_result_info(result_id):
     try:
         connection = connect()
@@ -388,7 +386,6 @@ def get_result_info(result_id):
             print("Connexion à la base de données fermée")
 
 
-
 def get_all_games():
     try:
         connection = connect()
@@ -413,5 +410,3 @@ def get_all_games():
             cursor.close()
             connection.close()
             print("Connexion à la base de données fermée")
-
-
