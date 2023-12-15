@@ -43,7 +43,7 @@ ENGINE = InnoDB;
 -- Table `projet_dbpy`.`results`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `projet_dbpy`.`results` (
-  `id` INT NULL DEFAULT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `hours` TIME NOT NULL,
   `date_time` DATETIME NOT NULL,
   `number_try` DECIMAL(10) NOT NULL,
