@@ -1,12 +1,13 @@
 """ Ethan Martin
     Projet DBPY
-    le 05.12.23"""
+    le 15.12.23"""
 
 import mysql.connector
 from mysql.connector import Error
 import datetime
 
 
+# Connection a la base de donnée
 def connect():
     try:
         connection = mysql.connector.connect(
@@ -25,6 +26,8 @@ def connect():
         print(f"Erreur de connexion à la base de données: {e}")
         return None
 
+
+# La fonction récupère les résultats des utilisateurs avec les détails de l'exercice depuis la base de données et les retourne sous forme de liste de dictionnaires triée par date.
 
 def get_all_results_with_exercise():
     try:
@@ -88,6 +91,8 @@ def get_user_id(user_nickname):
             print("Connexion à la base de données fermée")
 
 
+# La fonction récupère l'ID de l'utilisateur en utilisant le pseudo fourni et renvoie l'ID s'il est trouvé, sinon affiche un message d'absence.
+
 def get_exercise_id(exercise_code):
     try:
         connection = connect()
@@ -114,6 +119,9 @@ def get_exercise_id(exercise_code):
             connection.close()
             print("Connexion à la base de données fermée")
 
+
+# La fonction enregistre les résultats d'un exercice pour un utilisateur donné
+# ajoutant l'utilisateur et l'exercice s'ils n'existent pas encore dans la base de données.
 
 def save_result(exercise_code, user_pseudo, start_date, duration, nb_trials, nb_ok):
     try:
@@ -163,6 +171,8 @@ def save_result(exercise_code, user_pseudo, start_date, duration, nb_trials, nb_
             print("Connexion à la base de données fermée")
 
 
+# La fonction récupère les résultats filtrés en fonction des paramètres fournis,
+
 def get_filtered_results(exercise_filter, nickname_filter, start_date_filter):
     try:
         connection = connect()
@@ -209,6 +219,8 @@ def get_filtered_results(exercise_filter, nickname_filter, start_date_filter):
             connection.close()
             print("Connexion à la base de données fermée")
 
+
+# La fonction enregistre les résultats spécifiques à l'exercice INFO05 pour un utilisateur donné
 
 def save_info05_results(user_pseudo, start_date, duration, nb_trials, nb_ok):
     try:
@@ -260,6 +272,9 @@ def save_info05_results(user_pseudo, start_date, duration, nb_trials, nb_ok):
             print("Connexion à la base de données fermée")
 
 
+# La fonction supprime le résultat avec l'ID spécifié et
+# vérifie si l'utilisateur associé n'a plus aucun résultat, et le supprime également le cas échéant.
+
 def delete_result(result_id):
     try:
         connection = connect()
@@ -301,6 +316,7 @@ def delete_result(result_id):
             print("Connexion à la base de données fermée")
 
 
+# La fonction met à jour les informations d'un résultat spécifié avec de nouvelles valeurs
 def update_result(result_id, new_hours, new_number_try, new_number_ok, new_pseudo=None, new_game=None):
     try:
         connection = connect()
@@ -354,6 +370,7 @@ def update_result(result_id, new_hours, new_number_try, new_number_ok, new_pseud
             print("Connexion à la base de données fermée")
 
 
+# La fonction récupère les informations détaillées d'un résultat spécifié avec l'ID donné
 def get_result_info(result_id):
     try:
         connection = connect()
@@ -386,6 +403,7 @@ def get_result_info(result_id):
             print("Connexion à la base de données fermée")
 
 
+# La fonction récupère tous les codes d'exercice distincts disponibles dans la base de données.
 def get_all_games():
     try:
         connection = connect()

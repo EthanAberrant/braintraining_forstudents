@@ -1,6 +1,6 @@
 """ Ethan Martin
     Projet DBPY
-    le 05.12.23"""
+    le 15.12.23"""
 
 # Training (INFO02)
 

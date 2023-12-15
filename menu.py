@@ -1,3 +1,7 @@
+"""Ethan Martin
+Projet_DBPY
+Le 15.12.23"""
+
 # menu.py
 import tkinter as tk
 from tkinter import ttk
@@ -45,6 +49,7 @@ def display_result(event=None):
     filter_start_date = tk.Entry(filter_frame, font=("Arial", 12))
     filter_start_date.grid(row=0, column=5, padx=5, pady=5)
 
+    # Fonction pour appliquer les filtres
     def apply_filters():
         exercise_filter = filter_exercise.get()
         nickname_filter = filter_nickname.get()
@@ -102,11 +107,13 @@ def display_result(event=None):
     btn_add_result.grid(row=0, column=7, padx=10, pady=5)
 
 
+# Fonction pour supprimer un resultat
 def delete_result(result_id):
     database.delete_result(result_id)
     display_result()
 
 
+# Fonction pour modifier un resultat
 def modify_result(result_id, current_hours, current_number_try, current_number_ok, current_pseudo):
     result_info = database.get_result_info(result_id)
     if not result_info:
@@ -162,10 +169,10 @@ def modify_result(result_id, current_hours, current_number_try, current_number_o
 
 
 def update_result(result_id, new_hours, new_number_try, new_number_ok, new_pseudo, new_game):
-    # Assurez-vous que la fonction update_result dans votre module database est correctement implémentée
     database.update_result(result_id, new_hours, new_number_try, new_number_ok, new_pseudo, new_game)
 
 
+# Fonction pour ajouter manuelement un resultat
 def add_result():
     result_window = tk.Toplevel(window)
     result_window.title("Ajouter un résultat")
