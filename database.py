@@ -5,6 +5,7 @@
 import mysql.connector
 from mysql.connector import Error
 import datetime
+import bcrypt
 
 
 # Connection a la base de donnée
@@ -136,12 +137,13 @@ def save_result(exercise_code, user_pseudo, start_date, duration, nb_trials, nb_
                 print(f"Utilisateur '{user_pseudo}' existe déjà. ID: {user_id}")
             else:
                 # Ajouter l'utilisateur et récupérer l'ID
-                cursor.execute(f"INSERT INTO Users (nickname) VALUES ('{user_pseudo}')")
+                cursor.execute(
+                    f"INSERT INTO Users (nickname, hashed_password) VALUES ('{user_pseudo}', '{bcrypt.hashpw(b'your_password_here', bcrypt.gensalt())}')")
                 connection.commit()
                 user_id = cursor.lastrowid  # Récupérer l'ID après l'ajout
                 print(f"Utilisateur '{user_pseudo}' ajouté avec succès. ID: {user_id}")
 
-            # Affichez le pseudo correctement ici
+            # Affiche le pseudo correctement ici
             print("Résultat enregistré avec succès pour l'utilisateur:", user_pseudo)
 
             # Ajouter l'exercice s'il n'existe pas
@@ -428,3 +430,68 @@ def get_all_games():
             cursor.close()
             connection.close()
             print("Connexion à la base de données fermée")
+
+
+def authenticate_user(username, password):
+    try:
+        connection = connect()
+        if connection:
+            cursor = connection.cursor()
+
+            # Avant la requête SQL
+            print(f"Tentative d'authentification - Utilisateur : {username}, Mot de passe : {password}")
+
+            # Requête pour récupérer le mot de passe associé à l'utilisateur
+            cursor.execute("SELECT hashed_password FROM Users WHERE nickname = %s", (username,))
+            result = cursor.fetchone()
+
+            # Après la requête SQL
+            if result:
+                print("Utilisateur trouvé dans la base de données")
+                stored_hashed_password = result[0].encode('utf-8')
+                user_input_password = password.encode('utf-8')
+
+                # Vérifiez si le mot de passe correspond
+                if bcrypt.checkpw(user_input_password, stored_hashed_password):
+                    print("Authentification réussie")
+                    return True
+                else:
+                    print("Authentification échouée")
+            else:
+                print("Utilisateur non trouvé dans la base de données")
+
+    except Error as e:
+        # Dans le bloc except
+        print(f"Erreur lors de l'authentification de l'utilisateur : {e}")
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("Connexion à la base de données fermée")
+
+
+def register_user(username, hashed_password):
+    try:
+        connection = connect()
+        if connection:
+            cursor = connection.cursor()
+
+            # Requête pour insérer un nouvel utilisateur
+            cursor.execute("INSERT INTO Users (nickname, hashed_password) VALUES (%s, %s)",
+                           (username, hashed_password))
+
+            connection.commit()
+            print("Utilisateur enregistré avec succès.")
+
+    except Error as e:
+        print(f"Erreur lors de l'enregistrement de l'utilisateur : {e}")
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("Connexion à la base de données fermée")
+
+# Dans votre script principal, importez la fonction register_user
+# from database import register_user

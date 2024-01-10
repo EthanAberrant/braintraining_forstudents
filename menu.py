@@ -4,14 +4,16 @@ Le 15.12.23"""
 
 # menu.py
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, StringVar
+from tkinter.ttk import Combobox, Entry
+from tkinter import messagebox
+import bcrypt
+import hashlib
+import datetime
+import database
 import geo01
 import info02
 import info05
-import datetime
-import database
-from tkinter import StringVar
-from tkinter.ttk import Combobox
 
 a_exercise = ["geo01", "info02", "info05"]
 albl_image = [None, None, None]  # Label (with images) array
@@ -238,6 +240,100 @@ def quit(event):
     window.destroy()
 
 
+# Variables pour suivre l'état d'authentification
+user_authenticated = False
+
+
+def show_register_window():
+    register_window = tk.Toplevel()
+    register_window.title("Inscription")
+    register_window.geometry("400x200")
+
+    lbl_username = tk.Label(register_window, text="Nom d'utilisateur:", font=("Arial", 12))
+    lbl_username.grid(row=0, column=0, padx=5, pady=5)
+    entry_username = Entry(register_window, font=("Arial", 12))
+    entry_username.grid(row=0, column=1, padx=5, pady=5)
+
+    lbl_password = tk.Label(register_window, text="Mot de passe:", font=("Arial", 12))
+    lbl_password.grid(row=1, column=0, padx=5, pady=5)
+    entry_password = Entry(register_window, show="*", font=("Arial", 12))
+    entry_password.grid(row=1, column=1, padx=5, pady=5)
+
+    lbl_confirm_password = tk.Label(register_window, text="Confirmer le mot de passe:", font=("Arial", 12))
+    lbl_confirm_password.grid(row=2, column=0, padx=5, pady=5)
+    entry_confirm_password = Entry(register_window, show="*", font=("Arial", 12))
+    entry_confirm_password.grid(row=2, column=1, padx=5, pady=5)
+
+    def hash_password(password):
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        return hashed_password
+
+    def register_user():
+        username = entry_username.get()
+        password = entry_password.get()
+        confirm_password = entry_confirm_password.get()
+
+        if password == confirm_password:
+            # Utilisation de bcrypt pour hacher le mot de passe avant l'enregistrement dans la base de données
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
+            # Enregistrement de l'utilisateur dans la base de données avec le mot de passe haché
+            database.register_user(username, hashed_password)
+
+            # Après l'enregistrement, fermez la fenêtre d'enregistrement
+            register_window.destroy()
+            # Montrez la fenêtre de connexion
+            show_login_window()
+        else:
+            messagebox.showerror("Erreur", "Les mots de passe ne correspondent pas.")
+
+    def show_login_window_from_register():
+        # Fermez la fenêtre d'enregistrement et affichez la fenêtre de connexion
+        register_window.destroy()
+        show_login_window()
+
+    # Bouton pour passer directement à l'étape de connexion
+    btn_login_direct = tk.Button(register_window, text="Déjà un compte? Se connecter", font=("Arial", 12),
+                                 command=show_login_window_from_register)
+    btn_login_direct.grid(row=3, column=0, columnspan=2, pady=10)
+
+    btn_register = tk.Button(register_window, text="S'inscrire", font=("Arial", 12), command=register_user)
+    btn_register.grid(row=4, column=0, columnspan=2, pady=10)
+
+
+def show_login_window():
+    login_window = tk.Toplevel()
+    login_window.title("Connexion")
+    login_window.geometry("400x150")
+
+    lbl_username = tk.Label(login_window, text="Nom d'utilisateur:", font=("Arial", 12))
+    lbl_username.grid(row=0, column=0, padx=5, pady=5)
+    entry_username = Entry(login_window, font=("Arial", 12))
+    entry_username.grid(row=0, column=1, padx=5, pady=5)
+
+    lbl_password = tk.Label(login_window, text="Mot de passe:", font=("Arial", 12))
+    lbl_password.grid(row=1, column=0, padx=5, pady=5)
+    entry_password = Entry(login_window, show="*", font=("Arial", 12))
+    entry_password.grid(row=1, column=1, padx=5, pady=5)
+
+    def authenticate_user_interface():
+        global user_authenticated
+        username = entry_username.get()
+        password = entry_password.get()
+
+        # Vérifiez l'authentification de l'utilisateur avec la base de données
+        if database.authenticate_user(username, password):
+            login_window.destroy()
+            user_authenticated = True
+            # Montrez la fenêtre principale du jeu
+            window.deiconify()
+        else:
+            messagebox.showerror("Erreur", "Authentification échouée. Veuillez vérifier vos informations.")
+
+    btn_login = tk.Button(login_window, text="Se connecter", font=("Arial", 12), command=authenticate_user_interface)
+    btn_login.grid(row=2, column=0, columnspan=2, pady=10)
+
+
 window = tk.Tk()
 window.title("Entraînement cérébral")
 window.geometry("1100x900")
@@ -264,5 +360,11 @@ btn_display.grid(row=1 + 2 * len(a_exercise) // 3, column=1)
 
 btn_finish = tk.Button(window, text="Quitter", font=("Arial", 15), command=lambda: quit(None))
 btn_finish.grid(row=2 + 2 * len(a_exercise) // 3, column=1)
+
+# Cacher la fenêtre principale jusqu'à ce que l'utilisateur soit connecté
+window.withdraw()
+
+# Afficher d'abord la fenêtre d'enregistrement
+show_register_window()
 
 window.mainloop()
