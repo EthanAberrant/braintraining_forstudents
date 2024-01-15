@@ -493,5 +493,3 @@ def register_user(username, hashed_password):
             connection.close()
             print("Connexion à la base de données fermée")
 
-# Dans votre script principal, importez la fonction register_user
-# from database import register_user
