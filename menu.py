@@ -15,19 +15,23 @@ import geo01
 import info02
 import info05
 
+# Definition of available exercises
 a_exercise = ["geo01", "info02", "info05"]
-albl_image = [None, None, None]  # Label (with images) array
-a_image = [None, None, None]  # Images array
-a_title = [None, None, None]  # Array of title (ex: GEO01)
+albl_image = [None, None, None]
+a_image = [None, None, None]
+a_title = [None, None, None]
 
+# Dictionary of games with their associated function
 dict_games = {"geo01": geo01.open_window_geo_01, "info02": info02.open_window_info_02,
               "info05": info05.open_window_info_05}
 
 
+# Function to start an exercise based on the event
 def exercise(event, exer):
     dict_games[exer](window)
 
 
+# Function to display filtered results
 def display_result(event=None):
     result_window = tk.Toplevel(window)
     result_window.title("Résultats")
@@ -51,7 +55,6 @@ def display_result(event=None):
     filter_start_date = tk.Entry(filter_frame, font=("Arial", 12))
     filter_start_date.grid(row=0, column=5, padx=5, pady=5)
 
-    # Fonction pour appliquer les filtres
     def apply_filters():
         exercise_filter = filter_exercise.get()
         nickname_filter = filter_nickname.get()
@@ -109,13 +112,13 @@ def display_result(event=None):
     btn_add_result.grid(row=0, column=7, padx=10, pady=5)
 
 
-# Fonction pour supprimer un resultat
+# Function to delete a result
 def delete_result(result_id):
     database.delete_result(result_id)
     display_result()
 
 
-# Fonction pour modifier un resultat
+# Function to modify a result
 def modify_result(result_id, current_hours, current_number_try, current_number_ok, current_pseudo):
     result_info = database.get_result_info(result_id)
     if not result_info:
@@ -170,11 +173,12 @@ def modify_result(result_id, current_hours, current_number_try, current_number_o
     btn_modify_result.grid(row=5, column=0, columnspan=2, pady=10)
 
 
+# Function to update a modified result
 def update_result(result_id, new_hours, new_number_try, new_number_ok, new_pseudo, new_game):
     database.update_result(result_id, new_hours, new_number_try, new_number_ok, new_pseudo, new_game)
 
 
-# Fonction pour ajouter manuelement un resultat
+# Function to manually add a result
 def add_result():
     result_window = tk.Toplevel(window)
     result_window.title("Ajouter un résultat")
@@ -219,6 +223,7 @@ def add_result():
     btn_add_result.grid(row=5, column=0, columnspan=2, pady=10)
 
 
+# Function to save a new result
 def save_new_result(exercise_code, user_pseudo, hours, number_try, number_ok):
     # Obtenez l'ID de l'utilisateur
     user_id = database.get_user_id(user_pseudo)
@@ -236,14 +241,16 @@ def save_new_result(exercise_code, user_pseudo, hours, number_try, number_ok):
     display_result()
 
 
+# Function to quit the application
 def quit(event):
     window.destroy()
 
 
-# Variables pour suivre l'état d'authentification
+# Variables to track authentication state
 user_authenticated = False
 
 
+# Function to show the registration window
 def show_register_window():
     register_window = tk.Toplevel()
     register_window.title("Inscription")
@@ -264,10 +271,7 @@ def show_register_window():
     entry_confirm_password = Entry(register_window, show="*", font=("Arial", 12))
     entry_confirm_password.grid(row=2, column=1, padx=5, pady=5)
 
-    def hash_password(password):
-        hashed_password = hashlib.sha256(password.encode()).hexdigest()
-        return hashed_password
-
+    # Function to register a new user
     def register_user():
         username = entry_username.get()
         password = entry_password.get()
@@ -287,12 +291,13 @@ def show_register_window():
         else:
             messagebox.showerror("Erreur", "Les mots de passe ne correspondent pas.")
 
+    # Function to show the login window from the registration window
     def show_login_window_from_register():
         # Fermez la fenêtre d'enregistrement et affichez la fenêtre de connexion
         register_window.destroy()
         show_login_window()
 
-    # Bouton pour passer directement à l'étape de connexion
+    # Button to login
     btn_login_direct = tk.Button(register_window, text="Déjà un compte? Se connecter", font=("Arial", 12),
                                  command=show_login_window_from_register)
     btn_login_direct.grid(row=3, column=0, columnspan=2, pady=10)
@@ -301,6 +306,7 @@ def show_register_window():
     btn_register.grid(row=4, column=0, columnspan=2, pady=10)
 
 
+# Function to show the login window
 def show_login_window():
     login_window = tk.Toplevel()
     login_window.title("Connexion")
@@ -316,6 +322,7 @@ def show_login_window():
     entry_password = Entry(login_window, show="*", font=("Arial", 12))
     entry_password.grid(row=1, column=1, padx=5, pady=5)
 
+    # Function to authenticate the user
     def authenticate_user_interface():
         global user_authenticated
         username = entry_username.get()
@@ -334,6 +341,7 @@ def show_login_window():
     btn_login.grid(row=2, column=0, columnspan=2, pady=10)
 
 
+# Main function of the application
 window = tk.Tk()
 window.title("Entraînement cérébral")
 window.geometry("1100x900")
